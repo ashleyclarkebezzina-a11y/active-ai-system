@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Pause, Settings, AlertCircle, CheckCircle2, Clock, Zap } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Play, Pause, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
 
 export default function OutreachAutomation() {
   const [automation, setAutomation] = useState({
@@ -36,7 +36,7 @@ export default function OutreachAutomation() {
     successMetrics: ['10+ hours saved per team member', 'Faster client onboarding', 'Reduced support costs']
   });
 
-  const [complianceChecks, setComplianceChecks] = useState({
+  const [complianceChecks] = useState({
     linkedinCompliance: true,
     personalization: true,
     followUpProtocol: true,
@@ -72,7 +72,7 @@ export default function OutreachAutomation() {
     setSchedule(newSchedule);
   };
 
-  const calculateEstimates = () => {
+  const calculateEstimates = useCallback(() => {
     const estimatedResponseRate = 3.5;
     const estimatedConversions = Math.floor((automation.dailyTarget * 20 * estimatedResponseRate) / 100 * 0.15);
     setCampaignStats(prev => ({
@@ -80,11 +80,11 @@ export default function OutreachAutomation() {
       estimatedResponseRate,
       estimatedConversions
     }));
-  };
+  }, [automation.dailyTarget]);
 
   useEffect(() => {
     calculateEstimates();
-  }, [automation.dailyTarget]);
+  }, [calculateEstimates]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-4">
