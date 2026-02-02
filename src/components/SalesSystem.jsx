@@ -25,12 +25,6 @@ export default function SalesSystem() {
     }
   });
 
-  const [discoveryPhase, setDiscoveryPhase] = useState({
-    currentQuestion: 0,
-    responses: {},
-    showResults: false
-  });
-
   const discoveryScript = [
     {
       section: 'Opening',
