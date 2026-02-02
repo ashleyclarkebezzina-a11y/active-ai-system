@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MessageSquare, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
+import { Search, MessageSquare, CheckCircle, TrendingUp } from 'lucide-react';
 
 export default function OutreachManager() {
   const [leads, setLeads] = useState([]);
