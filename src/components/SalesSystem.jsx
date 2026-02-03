@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FileText, Phone, DollarSign, CheckCircle2, Copy, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, Phone, DollarSign, CheckCircle2, Copy, Download, Save } from 'lucide-react';
 
 export default function SalesSystem() {
   const [activeTab, setActiveTab] = useState('discovery');
@@ -16,6 +16,9 @@ export default function SalesSystem() {
     timeline: '3-6 months'
   });
 
+  const [discoveryNotes, setDiscoveryNotes] = useState({});
+  const [savedProposals, setSavedProposals] = useState([]);
+
   const [pricingModel] = useState({
     areas: {
       'Customer Service Automation': { base: 5000, perHour: 50, deliveryWeeks: 4 },
@@ -24,6 +27,31 @@ export default function SalesSystem() {
       'Client Onboarding': { base: 5500, perHour: 50, deliveryWeeks: 3 }
     }
   });
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedNotes = localStorage.getItem('activai_discovery_notes');
+    const savedProposalsData = localStorage.getItem('activai_proposals');
+    
+    if (savedNotes) {
+      setDiscoveryNotes(JSON.parse(savedNotes));
+    }
+    
+    if (savedProposalsData) {
+      setSavedProposals(JSON.parse(savedProposalsData));
+    }
+  }, []);
+
+  // Save discovery notes to localStorage
+  const saveDiscoveryNotes = () => {
+    localStorage.setItem('activai_discovery_notes', JSON.stringify(discoveryNotes));
+    alert('Discovery notes saved!');
+  };
+
+  const updateDiscoveryNote = (questionNum, value) => {
+    const updated = { ...discoveryNotes, [questionNum]: value };
+    setDiscoveryNotes(updated);
+  };
 
   const discoveryScript = [
     {
@@ -144,7 +172,7 @@ export default function SalesSystem() {
       totalCost,
       estimatedHours,
       deliveryWeeks: pricing.deliveryWeeks,
-      monthlySavings: Math.floor((estimatedHours * 50) / 4.33) // Hours saved * hourly rate / weeks
+      monthlySavings: Math.floor((estimatedHours * 50) / 4.33)
     };
   };
 
@@ -220,23 +248,52 @@ Timeline: Ready to start within 2 weeks
 This proposal is valid for 30 days.`;
   };
 
+  const saveProposal = () => {
+    if (!proposalData.companyName || !proposalData.contactName) {
+      alert('Please fill in at least Company Name and Contact Name');
+      return;
+    }
+
+    const proposalText = generateProposalText();
+    const newProposal = {
+      id: Date.now(),
+      companyName: proposalData.companyName,
+      contactName: proposalData.contactName,
+      date: new Date().toLocaleDateString(),
+      content: proposalText
+    };
+
+    const updated = [...savedProposals, newProposal];
+    setSavedProposals(updated);
+    localStorage.setItem('activai_proposals', JSON.stringify(updated));
+
+    // Download as .txt file
+    const element = document.createElement('a');
+    const file = new Blob([proposalText], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `${proposalData.companyName.replace(/\s+/g, '_')}_Proposal_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+
+    alert('Proposal saved to localStorage and downloaded as .txt file!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Activ-AI Sales System</h1>
           <p className="text-gray-600">Discovery calls, proposals, and pricing framework</p>
         </div>
 
-        {/* Tab Navigation */}
         <div className="flex gap-2 mb-8 flex-wrap">
           <button
             onClick={() => setActiveTab('discovery')}
             className={`px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2 ${
               activeTab === 'discovery'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 border border-gray-300 hover:border-blue-500'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-800 border border-gray-300 hover:border-black'
             }`}
           >
             <Phone size={20} /> Discovery Script
@@ -245,8 +302,8 @@ This proposal is valid for 30 days.`;
             onClick={() => setActiveTab('proposal')}
             className={`px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2 ${
               activeTab === 'proposal'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 border border-gray-300 hover:border-blue-500'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-800 border border-gray-300 hover:border-black'
             }`}
           >
             <FileText size={20} /> Proposal Generator
@@ -255,35 +312,56 @@ This proposal is valid for 30 days.`;
             onClick={() => setActiveTab('pricing')}
             className={`px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2 ${
               activeTab === 'pricing'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 border border-gray-300 hover:border-blue-500'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-800 border border-gray-300 hover:border-black'
             }`}
           >
             <DollarSign size={20} /> Pricing Model
           </button>
         </div>
 
-        {/* Discovery Call Script */}
         {activeTab === 'discovery' && (
           <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800">Call Notes</h3>
+                <button
+                  onClick={saveDiscoveryNotes}
+                  className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition flex items-center gap-2"
+                >
+                  <Save size={18} /> Save Notes
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">Your notes are automatically saved to browser localStorage</p>
+            </div>
+
             {discoveryScript.map((section, sectionIdx) => (
               <div key={sectionIdx} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="bg-blue-600 text-white px-6 py-4">
+                <div className="bg-black text-white px-6 py-4">
                   <h3 className="text-xl font-bold">{section.section}</h3>
                 </div>
                 <div className="p-6 space-y-6">
                   {section.questions.map((q, qIdx) => (
-                    <div key={qIdx} className="border-l-4 border-blue-500 pl-4">
+                    <div key={qIdx} className="border-l-4 border-black pl-4">
                       <div className="flex items-start gap-3 mb-3">
-                        <div className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold">
+                        <div className="bg-black text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold">
                           {q.num}
                         </div>
                         <div className="flex-1">
-                          <p className="text-lg font-semibold text-gray-800">{q.question}</p>
+                          <p className="text-lg font-semibold text-gray-800 mb-2">{q.question}</p>
+                          <div className="bg-yellow-50 p-3 rounded-lg mb-3">
+                            <p className="text-sm text-gray-700"><strong>Listen for:</strong> {q.notes}</p>
+                          </div>
+                          <div className="mt-3">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Your Notes:</label>
+                            <textarea
+                              value={discoveryNotes[q.num] || ''}
+                              onChange={(e) => updateDiscoveryNote(q.num, e.target.value)}
+                              placeholder="Type your notes here during the call..."
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black h-24"
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="bg-yellow-50 p-3 rounded-lg ml-11">
-                        <p className="text-sm text-gray-700"><strong>Listen for:</strong> {q.notes}</p>
                       </div>
                     </div>
                   ))}
@@ -306,7 +384,6 @@ This proposal is valid for 30 days.`;
           </div>
         )}
 
-        {/* Proposal Generator */}
         {activeTab === 'proposal' && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-lg p-8">
@@ -319,7 +396,7 @@ This proposal is valid for 30 days.`;
                     type="text"
                     value={proposalData.companyName}
                     onChange={(e) => setProposalData({ ...proposalData, companyName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                     placeholder="e.g., Tech Solutions Ltd"
                   />
                 </div>
@@ -329,7 +406,7 @@ This proposal is valid for 30 days.`;
                     type="text"
                     value={proposalData.contactName}
                     onChange={(e) => setProposalData({ ...proposalData, contactName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                     placeholder="e.g., John Smith"
                   />
                 </div>
@@ -339,7 +416,7 @@ This proposal is valid for 30 days.`;
                     type="text"
                     value={proposalData.contactTitle}
                     onChange={(e) => setProposalData({ ...proposalData, contactTitle: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                     placeholder="e.g., CEO"
                   />
                 </div>
@@ -349,7 +426,7 @@ This proposal is valid for 30 days.`;
                     type="email"
                     value={proposalData.email}
                     onChange={(e) => setProposalData({ ...proposalData, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                     placeholder="john@company.com"
                   />
                 </div>
@@ -361,7 +438,7 @@ This proposal is valid for 30 days.`;
                   type="number"
                   value={proposalData.teamSize}
                   onChange={(e) => setProposalData({ ...proposalData, teamSize: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                   placeholder="e.g., 10"
                 />
               </div>
@@ -372,7 +449,7 @@ This proposal is valid for 30 days.`;
                   <select
                     value={proposalData.selectedPainPoint}
                     onChange={(e) => setProposalData({ ...proposalData, selectedPainPoint: e.target.value })}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                   >
                     <option value="">Select a pain point...</option>
                     {painPointOptions.map(point => (
@@ -381,18 +458,18 @@ This proposal is valid for 30 days.`;
                   </select>
                   <button
                     onClick={addPainPoint}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
                   >
                     Add
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {proposalData.painPoints.map(point => (
-                    <div key={point} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <div key={point} className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {point}
                       <button
                         onClick={() => removePainPoint(point)}
-                        className="text-blue-600 hover:text-blue-800 font-bold"
+                        className="text-gray-600 hover:text-gray-800 font-bold"
                       >
                         ×
                       </button>
@@ -407,7 +484,7 @@ This proposal is valid for 30 days.`;
                   <select
                     value={proposalData.automationArea}
                     onChange={(e) => setProposalData({ ...proposalData, automationArea: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                   >
                     <option>Customer Service Automation</option>
                     <option>CRM Automation</option>
@@ -420,7 +497,7 @@ This proposal is valid for 30 days.`;
                   <select
                     value={proposalData.timeline}
                     onChange={(e) => setProposalData({ ...proposalData, timeline: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                   >
                     <option>1-2 weeks</option>
                     <option>3-6 weeks</option>
@@ -441,32 +518,53 @@ This proposal is valid for 30 days.`;
                         navigator.clipboard.writeText(generateProposalText());
                         alert('Proposal copied to clipboard!');
                       }}
-                      className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2"
+                      className="flex-1 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-semibold flex items-center justify-center gap-2"
                     >
-                      <Copy size={20} /> Copy Proposal
+                      <Copy size={20} /> Copy to Clipboard
                     </button>
                     <button
-                      onClick={() => {
-                        const element = document.createElement('a');
-                        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(generateProposalText()));
-                        element.setAttribute('download', `${proposalData.companyName}_Proposal.txt`);
-                        element.style.display = 'none';
-                        document.body.appendChild(element);
-                        element.click();
-                        document.body.removeChild(element);
-                      }}
-                      className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold flex items-center justify-center gap-2"
+                      onClick={saveProposal}
+                      className="flex-1 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition font-semibold flex items-center justify-center gap-2"
                     >
-                      <Download size={20} /> Download
+                      <Save size={20} /> Save & Download .txt
                     </button>
                   </div>
                 </div>
               )}
             </div>
+
+            {savedProposals.length > 0 && (
+              <div className="bg-white rounded-lg shadow-lg p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6">Saved Proposals ({savedProposals.length})</h3>
+                <div className="space-y-3">
+                  {savedProposals.map(proposal => (
+                    <div key={proposal.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div>
+                        <p className="font-semibold text-gray-800">{proposal.companyName} - {proposal.contactName}</p>
+                        <p className="text-sm text-gray-600">{proposal.date}</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const element = document.createElement('a');
+                          const file = new Blob([proposal.content], { type: 'text/plain' });
+                          element.href = URL.createObjectURL(file);
+                          element.download = `${proposal.companyName.replace(/\s+/g, '_')}_Proposal.txt`;
+                          document.body.appendChild(element);
+                          element.click();
+                          document.body.removeChild(element);
+                        }}
+                        className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition flex items-center gap-2"
+                      >
+                        <Download size={18} /> Download
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Pricing Model */}
         {activeTab === 'pricing' && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-lg p-8">
@@ -474,23 +572,23 @@ This proposal is valid for 30 days.`;
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {Object.entries(pricingModel.areas).map(([area, pricing]) => (
-                  <div key={area} className="border-2 border-gray-200 rounded-lg p-6 hover:border-blue-500 transition">
+                  <div key={area} className="border-2 border-gray-200 rounded-lg p-6 hover:border-black transition">
                     <h4 className="text-lg font-bold text-gray-800 mb-4">{area}</h4>
                     <div className="space-y-3 mb-6">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Base Service Fee</span>
-                        <span className="font-bold text-2xl text-blue-600">£{pricing.base.toLocaleString()}</span>
+                        <span className="font-bold text-2xl text-black">£{pricing.base.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Implementation (per hour)</span>
-                        <span className="font-bold text-lg text-blue-600">£{pricing.perHour}</span>
+                        <span className="font-bold text-lg text-black">£{pricing.perHour}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Typical Delivery</span>
-                        <span className="font-bold text-lg text-blue-600">{pricing.deliveryWeeks} weeks</span>
+                        <span className="font-bold text-lg text-black">{pricing.deliveryWeeks} weeks</span>
                       </div>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-lg text-sm text-gray-700">
+                    <div className="bg-gray-100 p-3 rounded-lg text-sm text-gray-700">
                       <p className="font-semibold mb-2">Typical Project: £{(pricing.base + (50 * pricing.perHour)).toLocaleString()}</p>
                       <p className="text-xs">(Base + ~50 hours implementation)</p>
                     </div>
@@ -498,7 +596,7 @@ This proposal is valid for 30 days.`;
                 ))}
               </div>
 
-              <div className="bg-purple-50 border-l-4 border-purple-600 p-6 rounded-lg">
+              <div className="bg-purple-50 border-l-4 border-purple-600 p-6 rounded-lg mb-6">
                 <h4 className="font-bold text-purple-900 mb-3">Pricing Strategy</h4>
                 <ul className="space-y-2 text-gray-800">
                   <li>• <strong>Base Fee:</strong> Covers discovery, design, and initial setup</li>
@@ -509,7 +607,7 @@ This proposal is valid for 30 days.`;
                 </ul>
               </div>
 
-              <div className="mt-8 bg-green-50 border-l-4 border-green-600 p-6 rounded-lg">
+              <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-lg">
                 <h4 className="font-bold text-green-900 mb-3 flex items-center gap-2">
                   <CheckCircle2 size={20} /> Sales Talking Points
                 </h4>
