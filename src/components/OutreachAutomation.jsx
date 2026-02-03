@@ -87,12 +87,12 @@ export default function OutreachAutomation() {
   }, [calculateEstimates]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Outreach Automation Engine</h1>
-          <p className="text-gray-600">AI-powered LinkedIn message scheduling and tracking system</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Outreach Planner</h1>
+          <p className="text-gray-600">Plan and track your LinkedIn outreach campaigns</p>
         </div>
 
         {/* Main Control Panel */}
