@@ -159,7 +159,7 @@ Date: ${new Date().toLocaleDateString()}
 
 EXECUTIVE SUMMARY
 
-Active AI proposes to automate key processes for ${proposalData.companyName}, focusing on ${proposalData.automationArea}. This solution will reduce manual workload, improve efficiency, and lower operational costs.
+Activ-AI proposes to automate key processes for ${proposalData.companyName}, focusing on ${proposalData.automationArea}. This solution will reduce manual workload, improve efficiency, and lower operational costs.
 
 ---
 
@@ -170,7 +170,7 @@ ${proposalData.painPoints.map((point, i) => `${i + 1}. ${point}`).join('\n')}
 
 PROPOSED SOLUTION
 
-Active AI will implement an AI-powered automation system that:
+Activ-AI will implement an AI-powered automation system that:
 • Handles repetitive, manual tasks automatically
 • Integrates with your existing systems
 • Scales as your business grows
@@ -212,7 +212,7 @@ NEXT STEPS
 3. Provide system access details
 4. Begin Phase 1 setup
 
-For questions, contact: Active AI
+For questions, contact: Activ-AI
 Timeline: Ready to start within 2 weeks
 
 ---
@@ -221,11 +221,11 @@ This proposal is valid for 30 days.`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Active AI Sales System</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Activ-AI Sales System</h1>
           <p className="text-gray-600">Discovery calls, proposals, and pricing framework</p>
         </div>
 
