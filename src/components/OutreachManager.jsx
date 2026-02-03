@@ -49,7 +49,7 @@ I noticed [COMPANY_NAME] is in the IT services space. We help firms like yours c
 Worth a quick conversation to explore?
 
 Best,
-Active AI`);
+Activ-AI`);
   }, []);
 
   const handleFileUpload = async (event) => {
@@ -212,10 +212,10 @@ Active AI`);
   const uniqueCountries = [...new Set(leads.map(l => l.country).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Active AI Outreach Hub</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Activ-AI Outreach Hub</h1>
           <p className="text-gray-600">LinkedIn outreach management for your IT services prospects</p>
         </div>
 
