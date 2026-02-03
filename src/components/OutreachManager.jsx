@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, MessageSquare, CheckCircle, TrendingUp, Upload, Filter } from 'lucide-react';
 
 export default function OutreachManager() {
@@ -117,7 +117,7 @@ Activ-AI`);
     return 'CRM Automation';
   };
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...leads];
 
     if (searchTerm) {
@@ -150,11 +150,11 @@ Activ-AI`);
     }
 
     setFilteredLeads(filtered);
-  };
+  }, [leads, searchTerm, filters, outreachStatus]);
 
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, filters, leads, outreachStatus]);
+  }, [applyFilters]);
 
   useEffect(() => {
     const messaged = Object.values(outreachStatus).filter(s => s.messaged).length;
